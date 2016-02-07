@@ -39,20 +39,19 @@ else:
 # Check for duplicates (using 2 files) and avoid spamming
 
 for submission in subreddit.get_hot(limit = 3):
-	if submission.id not in replied_to:
-	
-		# retrive comment forest, flatten out the forest for parsing
-		comment_forest = submission.comments
-		comments_flat = praw.helpers.flatten_tree(comment_forest)
+	# retrive comment forest, flatten out the forest for parsing
+	comment_forest = submission.comments
+	comments_flat = praw.helpers.flatten_tree(comment_forest)
 		
-		# reply to comments, check for duplicates
-		for comment in comments_flat:
-			if comment.id not in replied_to_comments:
-				if re.search("I can't see the sign", comment.body, re.IGNORECASE):
-					comment.reply("Make sure you have humanity!")
-					replied_to_comments.append(comment.id)
-					
-		# reply to the main submission, of criteria is emt
+	# reply to comments, check for duplicates
+	for comment in comments_flat:
+		if comment.id not in replied_to_comments:
+			if re.search("I can't see the sign", comment.body, re.IGNORECASE):
+				comment.reply("Make sure you have humanity!")
+				replied_to_comments.append(comment.id)
+	
+	# reply to the main submission, of criteria is met
+	if submission.id not in replied_to:
 		if re.search("Help with O&S", submission.title, re.IGNORECASE):
 			submission.add_comment("Try Solaire's white sign on the left staircase where the archer is! Remember to be in human form and stock up on humanity for future attempts!")
 			replied_to.append(submission.id)

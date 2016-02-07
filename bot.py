@@ -14,7 +14,7 @@ agent_name = ("Dark Souls Helper 1.0")
 r = praw.Reddit(user_agent = agent_name)
 r.login(reddit_id, reddit_pw, disable_warning = True)
 
-# Initialize subreddit (will be on a temporary subreddit until successful deployement)
+# Initialize subreddit (will be on a temporary subreddit until successful deployment)
 subreddit = r.get_subreddit("pythonforengineers")
 
 # Make/Check file for replied-to posts 
@@ -29,8 +29,12 @@ else:
 # Check for target strings and reply to posts
 # Check for duplicates and avoid spamming
 
-for submission in subreddit.get_hot(limit = 10):
+
+for submission in subreddit.get_hot(limit = 3):
 	if submission.id not in replied_to:
+		for comment in submission.comments:
+			if re.search("i can't see the sign", comment.body, re.IGNORECASE):
+				comment.reply("You need humanity to see the sign!")
 		if re.search("Help with O&S", submission.title, re.IGNORECASE):
 			submission.add_comment("Try Solaire's white sign on the left staircase where the archer is! Remember to be in human form and stock up on humanity for future attempts!")
 			replied_to.append(submission.id)

@@ -26,15 +26,33 @@ else:
 		replied_to = replied_to.split("\n")
 		replied_to = filter(None, replied_to)
 
-# Check for target strings and reply to posts
-# Check for duplicates and avoid spamming
+# Make/Check file for replied-to comments, including child comments		
+if not os.path.isfile("replied_comments.txt"):
+	replied_to_comments = []
+else:
+	with open("replied_comments.txt", "r") as postfile:
+		replied_to_comments = postfile.read()
+		replied_to_comments = replied_to_comments.split("\n")
+		replied_to_comments = filter(None, replied_to_comments)
 
+# Check for target strings and reply to posts and comments
+# Check for duplicates (using 2 files) and avoid spamming
 
 for submission in subreddit.get_hot(limit = 3):
 	if submission.id not in replied_to:
-		for comment in submission.comments:
-			if re.search("i can't see the sign", comment.body, re.IGNORECASE):
-				comment.reply("You need humanity to see the sign!")
+	
+		# retrive comment forest, flatten out the forest for parsing
+		comment_forest = submission.comments
+		comments_flat = praw.helpers.flatten_tree(comment_forest)
+		
+		# reply to comments, check for duplicates
+		for comment in comments_flat:
+			if comment.id not in replied_to_comments:
+				if re.search("I can't see the sign", comment.body, re.IGNORECASE):
+					comment.reply("Make sure you have humanity!")
+					replied_to_comments.append(comment.id)
+					
+		# reply to the main submission, of criteria is emt
 		if re.search("Help with O&S", submission.title, re.IGNORECASE):
 			submission.add_comment("Try Solaire's white sign on the left staircase where the archer is! Remember to be in human form and stock up on humanity for future attempts!")
 			replied_to.append(submission.id)
@@ -42,4 +60,9 @@ for submission in subreddit.get_hot(limit = 3):
 # Append to replied-posts
 with open("replied_posts.txt", "w") as postfile:
 	for pid in replied_to:
+		postfile.write(pid + "\n")
+
+# Append to replied-comments
+with open("replied_comments.txt", "w") as postfile:
+	for pid in replied_to_comments:
 		postfile.write(pid + "\n")
